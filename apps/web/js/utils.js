@@ -8,14 +8,14 @@ export function toast(message, type = 'default') {
   setTimeout(() => el.remove(), 3000);
 }
 
-// ページ切り替え (SPA)
+// ページ切り替え (SPA) - サイドバーのアクティブ状態を更新
 export function showPage(pageId) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   const page = document.getElementById(pageId);
   if (page) page.classList.add('active');
 
-  // ボトムナビのアクティブ状態
-  document.querySelectorAll('.bottom-nav a').forEach(a => {
+  // サイドバーのアクティブ状態
+  document.querySelectorAll('.sidebar-nav-item').forEach(a => {
     a.classList.toggle('active', a.dataset.page === pageId);
   });
 
