@@ -1,3 +1,5 @@
 {
-  "rootDirectory": "apps/web"
+  "buildCommand": "",
+  "outputDirectory": "apps/web",
+  "installCommand": ""
 }
