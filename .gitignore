@@ -1,0 +1,29 @@
+# 依存パッケージ
+node_modules/
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# 環境変数（シークレット）
+.env
+.env.local
+.env.*.local
+
+# ビルド成果物
+dist/
+build/
+.expo/
+ios/
+android/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# エディタ
+.vscode/settings.json
+*.swp
+
+# Expo
+*.orig.*

@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#0D1117">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>IGNITERA</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/theme.css">
+  <style>
+    /* ===================== ローディング画面 ===================== */
+    #app-loading {
+      position: fixed; inset: 0;
+      background: #0D1117;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 16px; z-index: 9998;
+    }
+    #app-loading .logo { font-size: 32px; font-weight: 900; letter-spacing: 4px; }
+    #app-loading .spinner { width: 32px; height: 32px; }
+
+    /* ===================== 認証ページ ===================== */
+    .auth-page {
+      min-height: 100vh;
+      display: flex; flex-direction: column;
+      justify-content: center;
+      padding: 24px 20px;
+      max-width: 420px;
+      margin: 0 auto;
+    }
+    .auth-logo { text-align: center; margin-bottom: 40px; }
+    .auth-logo .logo-text { font-size: 32px; font-weight: 900; letter-spacing: 4px; }
+    .auth-logo .logo-sub { font-size: 13px; color: var(--text-secondary); margin-top: 6px; }
+    .auth-switch { text-align: center; margin-top: 16px; font-size: 13px; color: var(--text-secondary); }
+    .auth-switch a { color: var(--primary); font-weight: 600; text-decoration: none; }
+
+    /* ===================== ホーム画面 ===================== */
+    .home-header { margin-bottom: 24px; }
+    .home-greeting { font-size: 13px; color: var(--text-secondary); }
+    .home-name { font-size: 22px; font-weight: 700; margin-top: 2px; }
+    .logo-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-top: 3px solid var(--primary);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      text-align: center;
+      margin-bottom: 24px;
+    }
+    .logo-card .logo-main { font-size: 28px; font-weight: 900; letter-spacing: 4px; }
+    .logo-card .logo-sub { font-size: 12px; color: var(--text-secondary); margin-top: 4px; }
+    .action-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .action-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      cursor: pointer;
+      text-decoration: none;
+      color: var(--text);
+      transition: border-color 0.15s;
+    }
+    .action-card:hover { border-color: var(--primary); }
+    .action-card .action-emoji { font-size: 24px; margin-bottom: 6px; }
+    .action-card .action-title { font-size: 14px; font-weight: 700; margin-bottom: 2px; }
+    .action-card .action-desc { font-size: 12px; color: var(--text-secondary); line-height: 1.4; }
+
+    /* ===================== プロフィール画面 ===================== */
+    .profile-header { display: flex; flex-direction: column; align-items: center; margin-bottom: 24px; }
+    .profile-name { font-size: 22px; font-weight: 700; margin-top: 12px; }
+    .diagnosis-banner {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-left: 4px solid var(--primary);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+    .diagnosis-banner h3 { font-size: 15px; font-weight: 700; margin-bottom: 4px; }
+    .diagnosis-banner p { font-size: 13px; color: var(--text-secondary); margin-bottom: 12px; }
+
+    /* ===================== 案件画面 ===================== */
+    .project-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      margin-bottom: 10px;
+      cursor: pointer;
+      transition: border-color 0.15s;
+    }
+    .project-card:hover { border-color: var(--text-secondary); }
+    .project-card .project-title { font-size: 15px; font-weight: 700; margin-bottom: 6px; }
+    .project-card .project-company { font-size: 13px; color: var(--text-secondary); }
+    .project-card .project-meta { display: flex; justify-content: space-between; margin-top: 10px; align-items: center; }
+
+    /* ===================== ページトップヘッダー ===================== */
+    .page-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    .page-header h1 { font-size: 22px; font-weight: 700; }
+
+    /* ===================== 空状態 ===================== */
+    .empty-state {
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      padding: 60px 20px; text-align: center;
+    }
+    .empty-state .empty-emoji { font-size: 48px; margin-bottom: 12px; }
+    .empty-state .empty-title { font-size: 17px; font-weight: 700; margin-bottom: 8px; }
+    .empty-state .empty-desc { font-size: 13px; color: var(--text-secondary); line-height: 1.6; margin-bottom: 20px; }
+  </style>
+</head>
+<body>
+
+<!-- ローディング -->
+<div id="app-loading">
+  <div class="logo">IGNITERA</div>
+  <div class="spinner"></div>
+</div>
+
+<!-- トースト通知コンテナ -->
+<div id="toast-container"></div>
+
+<!-- ===================== 認証ページ群 ===================== -->
+
+<!-- ログイン -->
+<div id="login-page" class="page">
+  <div class="auth-page">
+    <div class="auth-logo">
+      <div class="logo-text">IGNITERA</div>
+      <div class="logo-sub">学生が自ら営業し、案件を獲得・遂行する</div>
+    </div>
+    <form id="login-form" class="card">
+      <div class="form-group">
+        <label class="form-label">メールアドレス</label>
+        <input id="login-email" type="email" class="form-input" placeholder="example@mail.com" autocomplete="email" required>
+      </div>
+      <div class="form-group">
+        <label class="form-label">パスワード</label>
+        <input id="login-password" type="password" class="form-input" placeholder="••••••••" autocomplete="current-password" required>
+      </div>
+      <button type="submit" class="btn btn-primary btn-full mt-8">ログイン</button>
+    </form>
+    <div class="auth-switch">
+      アカウントをお持ちでない方は <a href="#" onclick="showPage('register-page'); return false;">新規登録</a>
+    </div>
+  </div>
+</div>
+
+<!-- 新規登録 -->
+<div id="register-page" class="page">
+  <div class="auth-page">
+    <div class="auth-logo">
+      <div class="logo-text">IGNITERA</div>
+      <div class="logo-sub">新規アカウント登録</div>
+    </div>
+    <form id="register-form" class="card">
+      <div class="form-group">
+        <label class="form-label">表示名</label>
+        <input id="reg-name" type="text" class="form-input" placeholder="山田 太郎" required>
+      </div>
+      <div class="form-group">
+        <label class="form-label">メールアドレス</label>
+        <input id="reg-email" type="email" class="form-input" placeholder="example@mail.com" autocomplete="email" required>
+      </div>
+      <div class="form-group">
+        <label class="form-label">パスワード（8文字以上）</label>
+        <input id="reg-password" type="password" class="form-input" placeholder="••••••••" autocomplete="new-password" required>
+      </div>
+      <button type="submit" class="btn btn-primary btn-full mt-8">登録する</button>
+    </form>
+    <div class="auth-switch">
+      既にアカウントをお持ちの方は <a href="#" onclick="showPage('login-page'); return false;">ログイン</a>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== メインアプリ ===================== -->
+
+<!-- ホーム -->
+<div id="home-page" class="page">
+  <div class="content-area">
+    <div class="home-header flex justify-between items-center">
+      <div>
+        <div class="home-greeting">こんにちは 👋</div>
+        <div class="home-name" id="home-username">...</div>
+      </div>
+      <button class="btn btn-outline btn-sm" onclick="handleSignOut()">ログアウト</button>
+    </div>
+
+    <div class="logo-card">
+      <div class="logo-main">IGNITERA</div>
+      <div class="logo-sub">学生が自ら営業し、案件を獲得・遂行する</div>
+    </div>
+
+    <div class="section-title">クイックアクション</div>
+    <div class="action-grid">
+      <a class="action-card" href="#" onclick="showPage('projects-page'); return false;">
+        <div class="action-emoji">💼</div>
+        <div class="action-title">案件</div>
+        <div class="action-desc">営業で獲得した案件を登録・管理する</div>
+      </a>
+      <a class="action-card" href="#" onclick="showPage('profile-page'); return false;">
+        <div class="action-emoji">👤</div>
+        <div class="action-title">プロフィール</div>
+        <div class="action-desc">スキルや診断結果を確認する</div>
+      </a>
+      <a class="action-card" href="#" onclick="showPage('calendar-page'); return false;">
+        <div class="action-emoji">📅</div>
+        <div class="action-title">カレンダー</div>
+        <div class="action-desc">予定・締切を確認する</div>
+      </a>
+      <a class="action-card" href="#" onclick="showPage('notifications-page'); return false;">
+        <div class="action-emoji">🔔</div>
+        <div class="action-title">通知</div>
+        <div class="action-desc">未読の通知を確認する</div>
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- 案件一覧 -->
+<div id="projects-page" class="page">
+  <div class="content-area">
+    <div class="page-header">
+      <h1>案件</h1>
+      <button class="btn btn-primary btn-sm" onclick="showPage('project-new-page')">+ 登録</button>
+    </div>
+    <div id="projects-list">
+      <div class="empty-state">
+        <div class="empty-emoji">💼</div>
+        <div class="empty-title">案件はまだありません</div>
+        <div class="empty-desc">企業に営業して案件を獲得したら、ここに登録してください</div>
+        <button class="btn btn-primary" onclick="showPage('project-new-page')">+ 案件を登録する</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 案件登録 -->
+<div id="project-new-page" class="page">
+  <div class="content-area">
+    <div class="page-header">
+      <h1>案件を登録</h1>
+      <button class="btn btn-outline btn-sm" onclick="showPage('projects-page')">← 戻る</button>
+    </div>
+    <form id="project-form" class="card">
+      <div class="form-group">
+        <label class="form-label">企業名</label>
+        <input id="proj-company" type="text" class="form-input" placeholder="株式会社〇〇" required>
+      </div>
+      <div class="form-group">
+        <label class="form-label">案件タイトル</label>
+        <input id="proj-title" type="text" class="form-input" placeholder="LP制作・SNS運用など" required>
+      </div>
+      <div class="form-group">
+        <label class="form-label">案件内容</label>
+        <textarea id="proj-desc" class="form-input" rows="4" placeholder="案件の詳細を記入してください" style="resize:vertical"></textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label">納品期限</label>
+        <input id="proj-deadline" type="date" class="form-input">
+      </div>
+      <button type="submit" class="btn btn-primary btn-full mt-8">登録する（承認待ちになります）</button>
+    </form>
+  </div>
+</div>
+
+<!-- プロフィール -->
+<div id="profile-page" class="page">
+  <div class="content-area">
+    <div class="profile-header">
+      <div class="avatar avatar-lg" id="profile-avatar">?</div>
+      <div class="profile-name" id="profile-name">...</div>
+      <div class="badge mt-8">学生</div>
+    </div>
+
+    <!-- 診断結果 -->
+    <div class="section-title">本格診断結果</div>
+    <div id="diagnosis-section">
+      <!-- JS で動的に挿入 -->
+    </div>
+  </div>
+</div>
+
+<!-- カレンダー -->
+<div id="calendar-page" class="page">
+  <div class="content-area">
+    <div class="page-header"><h1>カレンダー</h1></div>
+    <div class="empty-state">
+      <div class="empty-emoji">📅</div>
+      <div class="empty-title">予定はまだありません</div>
+      <div class="empty-desc">案件に参加すると、ミーティングや締切がここに表示されます</div>
+    </div>
+  </div>
+</div>
+
+<!-- 通知 -->
+<div id="notifications-page" class="page">
+  <div class="content-area">
+    <div class="page-header"><h1>通知</h1></div>
+    <div class="empty-state">
+      <div class="empty-emoji">🔔</div>
+      <div class="empty-title">通知はありません</div>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== ボトムナビ ===================== -->
+<nav class="bottom-nav hidden" id="bottom-nav">
+  <a href="#" data-page="home-page" onclick="showPage('home-page'); return false;">
+    <span class="nav-icon">🏠</span>ホーム
+  </a>
+  <a href="#" data-page="projects-page" onclick="showPage('projects-page'); return false;">
+    <span class="nav-icon">💼</span>案件
+  </a>
+  <a href="#" data-page="calendar-page" onclick="showPage('calendar-page'); return false;">
+    <span class="nav-icon">📅</span>カレンダー
+  </a>
+  <a href="#" data-page="profile-page" onclick="showPage('profile-page'); return false;">
+    <span class="nav-icon">👤</span>プロフィール
+  </a>
+</nav>
+
+<!-- ===================== Supabase SDK (CDN) ===================== -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script type="module" src="js/app.js"></script>
+</body>
+</html>
